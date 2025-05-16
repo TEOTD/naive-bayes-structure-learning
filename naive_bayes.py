@@ -78,16 +78,25 @@ if __name__ == '__main__':
     train_df = pd.read_csv('mushroom_train.data', header=None)
     test_df = pd.read_csv('mushroom_test.data', header=None)
 
-    def encode_data(df):
-        encoded = df.copy()
+
+    def encode_data(train_df, test_df):
+        # Combine datasets to ensure consistent encoding
+        all_data = pd.concat([train_df, test_df], axis=0)
+        encoded = all_data.copy()
         encoders = {}
-        for col in df.columns:
-            encoded[col], encoders[col] = df[col].factorize()
-        return encoded, encoders
+
+        # Encode each column
+        for col in all_data.columns:
+            encoded[col], encoders[col] = all_data[col].factorize()
+
+        # Split back to train and test
+        train_encoded = encoded.iloc[:len(train_df)]
+        test_encoded = encoded.iloc[len(train_df):]
+
+        return train_encoded, test_encoded, encoders
 
     # Encode training and test data
-    train_encoded, _ = encode_data(train_df)
-    test_encoded, _ = encode_data(test_df)
+    train_encoded, test_encoded, _ = encode_data(train_df, test_df)
 
     # Split into features (X) and target (y)
     # Assumes first column is target, rest are features
